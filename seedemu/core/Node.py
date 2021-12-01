@@ -210,7 +210,7 @@ class Node(Printable, Registrable, Configurable, Vertex):
     __interfaces: List[Interface]
     __files: Dict[str, File]
     __softwares: Set[str]
-    __build_commands: List[str]
+    __build_commands: List[List[str]]
     __start_commands: List[Tuple[str, bool]]
     __ports: List[Tuple[int, int, str]]
     __privileged: bool
@@ -242,7 +242,7 @@ class Node(Printable, Registrable, Configurable, Vertex):
         self.__name = name
         self.__scope = scope if scope != None else str(asn)
         self.__softwares = set()
-        self.__build_commands = []
+        self.__build_commands = [[]]
         self.__start_commands = []
         self.__ports = []
         self.__privileged = False
@@ -559,7 +559,7 @@ class Node(Printable, Registrable, Configurable, Vertex):
         """
         return self.__softwares
 
-    def addBuildCommand(self, cmd: str) -> Node:
+    def addBuildCommand(self, cmd: str, intent='RUN') -> Node:
         """!
         @brief Add new command to build step.
 
@@ -570,7 +570,36 @@ class Node(Printable, Registrable, Configurable, Vertex):
 
         @returns self, for chaining API calls.
         """
-        self.__build_commands.append(cmd)
+        self.__build_commands.append([intent, cmd])
+
+        return self
+
+    def changeWorkdir(self, workdir: str) -> Node:
+        """!
+        @brief Changes the working directory
+
+        Use this to change the working directory for any RUN, CMD, ENTRYPOINT,
+        COPY and ADD instructions that follow.
+
+        @param workdir new working directory
+
+        @returns self, for chaining API calls.
+        """
+        self.addBuildCommand(workdir, intent='WORKDIR')
+
+        return self
+
+    def addToPath(self, path: str) -> Node:
+        """!
+        @brief Adds a directory to $PATH
+
+        Use this to add a directory to the $PATH environment variable
+
+        @param path directory to add
+
+        @returns self, for chaining API calls.
+        """
+        self.addBuildCommand('export PATH=\"'+path+':$PATH\"')
 
         return self
     
@@ -734,9 +763,9 @@ class Node(Printable, Registrable, Configurable, Vertex):
         out += ' ' * indent
         out += 'Additional Build Commands:\n'
         indent += 4
-        for cmd in self.__build_commands:
+        for intent, cmd in self.__build_commands:
             out += ' ' * indent
-            out += '{}\n'.format(cmd)
+            out += '{} {}\n'.format(intent, cmd)
         indent -= 4
 
         out += ' ' * indent

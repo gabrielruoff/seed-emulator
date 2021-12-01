@@ -749,7 +749,11 @@ class Docker(Compiler):
         dockerfile = 'FROM {}\n'.format(md5(image.getName().encode('utf-8')).hexdigest()) + dockerfile
         self._used_images.add(image.getName())
 
-        for cmd in node.getBuildCommands(): dockerfile += 'RUN {}\n'.format(cmd)
+        # write build commands to Dockerfile
+        for command in node.getBuildCommands():
+            if len(command) > 1 and command[0] and command[1]:
+                intent, cmd = command
+                dockerfile += '{} {}\n'.format(intent, cmd)
 
         start_commands = ''
 
