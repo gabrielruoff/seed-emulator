@@ -213,6 +213,7 @@ class Node(Printable, Registrable, Configurable, Vertex):
     __build_commands: List[List[str]]
     __start_commands: List[Tuple[str, bool]]
     __ports: List[Tuple[int, int, str]]
+    __expose_ports: List[Tuple[int, int]]
     __privileged: bool
 
     __configured: bool
@@ -220,7 +221,7 @@ class Node(Printable, Registrable, Configurable, Vertex):
     __xcs: Dict[Tuple[str, int], Tuple[IPv4Interface, str]]
 
     __shared_folders: Dict[str, str]
-    __persistent_storages: List[str] 
+    __persistent_storages: List[str]
 
     __name_servers: List[str]
 
@@ -245,6 +246,7 @@ class Node(Printable, Registrable, Configurable, Vertex):
         self.__build_commands = [[]]
         self.__start_commands = []
         self.__ports = []
+        self.__expose_ports = []
         self.__privileged = False
 
         self.__pending_nets = []
@@ -366,6 +368,26 @@ class Node(Printable, Registrable, Configurable, Vertex):
         
         """
         return self.__ports
+
+    def addExposePort(self, host: int, node: int) -> Node:
+        """!
+        @brief Add expose port forwarding.
+
+        @param host port of the host.
+        @param node port of the node.
+
+        @returns self, for chaining API calls.
+        """
+        self.__expose_ports.append((host, node))
+
+    def getExposePorts(self) -> List[Tuple[int, int]]:
+        """!
+        @brief Get port forwardings.
+
+        @returns list of tuple of expose ports (host, node).
+
+        """
+        return self.__expose_ports
 
     def setPrivileged(self, privileged: bool) -> Node:
         """!

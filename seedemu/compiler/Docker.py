@@ -119,7 +119,7 @@ DockerCompilerFileTemplates['compose_service'] = """\
             - net.ipv4.conf.all.rp_filter=0
         privileged: true
         networks:
-{networks}{ports}{volumes}
+{networks}{ports}{exposePorts}{volumes}
         labels:
 {labelList}
 """
@@ -135,6 +135,15 @@ DockerCompilerFileTemplates['compose_ports'] = """\
 
 DockerCompilerFileTemplates['compose_port'] = """\
             - {hostPort}:{nodePort}/{proto}
+"""
+
+DockerCompilerFileTemplates['compose_expose_ports'] = """\
+        expose:
+{portList}
+"""
+
+DockerCompilerFileTemplates['compose_expose_port'] = """\
+            - {nodePort}
 """
 
 DockerCompilerFileTemplates['compose_volumes'] = """\
@@ -655,6 +664,7 @@ class Docker(Compiler):
 
         @returns docker-compose service string.
         """
+        print((node.getPorts()))
         (scope, type, _) = node.getRegistryInfo()
         prefix = self._contextToPrefix(scope, type)
         real_nodename = '{}{}'.format(prefix, node.getName())
@@ -707,6 +717,18 @@ class Docker(Compiler):
             ports = DockerCompilerFileTemplates['compose_ports'].format(
                 portList = lst
             )
+
+        # _expose_ports = node.getExposePorts()
+        expose_ports = ''
+        # if len(_expose_ports) > 0:
+        #     lst = ''
+        #     for (h, n, p) in _expose_ports:
+        #         lst += DockerCompilerFileTemplates['compose_expose_port'].format(
+        #             nodePort = n
+        #         )
+        #     expose_ports = DockerCompilerFileTemplates['compose_expose_ports'].format(
+        #         portList = lst
+        #     )
         
         _volumes = node.getSharedFolders()
         storages = node.getPersistentStorages()
@@ -715,13 +737,12 @@ class Docker(Compiler):
 
         if len(_volumes) > 0 or len(storages) > 0:
             lst = ''
-
             for (nodePath, hostPath) in _volumes.items():
                 lst += DockerCompilerFileTemplates['compose_volume'].format(
                     hostPath = hostPath,
                     nodePath = nodePath
                 )
-            
+
             for path in storages:
                 lst += DockerCompilerFileTemplates['compose_storage'].format(
                     nodePath = path
@@ -802,6 +823,7 @@ class Docker(Compiler):
             networks = node_nets,
             # privileged = 'true' if node.isPrivileged() else 'false',
             ports = ports,
+            exposePorts = expose_ports,
             labelList = self._getNodeMeta(node),
             volumes = volumes
         )
