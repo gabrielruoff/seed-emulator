@@ -1,0 +1,22 @@
+#!/bin/bash
+
+while read -r node; do {
+    let count=0
+    ok=true
+
+    until curl -sHf http://$node/bsc-enode-url > /dev/null; do {
+        echo "bsc: node $node not ready, waiting..."
+        sleep 3
+        let count++
+        [ $count -gt 20 ] && {
+            echo "bsc: node $node failed too many times, skipping."
+            ok=false
+            break
+        }
+    }; done
+
+    ($ok) && {
+        echo "`curl -s http://$node/bsc-enode-url`," >> /tmp/bsc-node-urls
+    }
+}; done < /tmp/bsc-nodes
+

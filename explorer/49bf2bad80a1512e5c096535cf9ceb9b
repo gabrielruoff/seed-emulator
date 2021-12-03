@@ -1,0 +1,6 @@
+variable=$(cat /tmp/bsc-node-urls)
+for i in ${variable//,/ }
+do
+    geth --exec "admin.addPeer(\"$i\")" attach ipc://.node/geth.ipc
+done
+
