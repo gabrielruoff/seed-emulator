@@ -664,7 +664,7 @@ class Docker(Compiler):
 
         @returns docker-compose service string.
         """
-        print((node.getPorts()))
+        # print((node.getPorts()))
         (scope, type, _) = node.getRegistryInfo()
         prefix = self._contextToPrefix(scope, type)
         real_nodename = '{}{}'.format(prefix, node.getName())
