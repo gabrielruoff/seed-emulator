@@ -22,7 +22,7 @@ emu.addBinding(Binding('bsc3', filter = Filter(asn = 163)))
 emu.addBinding(Binding('bsc4', filter = Filter(asn = 164)))
 emu.addBinding(Binding('bsc5', filter = Filter(asn = 150)))
 emu.addBinding(Binding('bsc6', filter = Filter(asn = 170)))
-emu.addBinding(Binding('gan1', filter= Filter(asn = 171)))
+#emu.addBinding(Binding('gan1', filter= Filter(asn = 171)))
 
 output = './output'
 
