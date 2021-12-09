@@ -250,15 +250,15 @@ class BSCServer(Server):
         # get BSC executable and mainnet
         node.addBuildCommand('wget https://github.com/binance-chain/bsc/releases/download/v1.1.5/geth_linux -O /usr/bin/geth -q --show-progress')
 
-        node.addBuildCommand('git clone https://github.com/trufflesuite/truffle.git')
-        node.changeWorkdir('/truffle')
-        node.addBuildCommand('/usr/bin/npm install -g truffle')
-        node.changeWorkdir('/')
-
-        node.addBuildCommand('git clone https://github.com/trufflesuite/ganache-ui.git')
-        node.changeWorkdir('/ganache-ui')
-        node.addBuildCommand('/usr/bin/npm install')
-        node.changeWorkdir('/')
+        # node.addBuildCommand('git clone https://github.com/trufflesuite/truffle.git')
+        # node.changeWorkdir('/truffle')
+        # node.addBuildCommand('/usr/bin/npm install -g truffle')
+        # node.changeWorkdir('/')
+        #
+        # node.addBuildCommand('git clone https://github.com/trufflesuite/ganache-ui.git')
+        # node.changeWorkdir('/ganache-ui')
+        # node.addBuildCommand('/usr/bin/npm install')
+        # node.changeWorkdir('/')
 
 
         # Change mode of gethBSC to executable
@@ -514,11 +514,7 @@ class BSCService(Service):
 class GanacheServer(BSCServer):
 
     def __init__(self, id: int):
-        """!
-        @brief create new eth server.
-
-        @param id serial number of this server.
-        """
+        super().__init__(id)
         self.__id = id
         self.__is_bootnode = False
         self.__bootnode_http_port = 8088
@@ -621,15 +617,15 @@ class GanacheServer(BSCServer):
         node.addBuildCommand(
             'wget https://github.com/binance-chain/bsc/releases/download/v1.1.5/geth_linux -O /usr/bin/geth -q --show-progress')
 
-        node.addBuildCommand('git clone https://github.com/trufflesuite/truffle.git')
-        node.changeWorkdir('/truffle')
-        node.addBuildCommand('/usr/bin/npm install -g truffle')
-        node.changeWorkdir('/')
+        node.addBuildCommand('git clone https://github.com/poanetwork/blockscout')
+        node.changeWorkdir('/blockscout')
+        # node.addBuildCommand('/usr/bin/npm install -g truffle')
+        # node.changeWorkdir('/')
 
-        node.addBuildCommand('git clone https://github.com/trufflesuite/ganache-ui.git')
-        node.changeWorkdir('/ganache-ui')
-        node.addBuildCommand('/usr/bin/npm install')
-        node.changeWorkdir('/')
+        # node.addBuildCommand('git clone https://github.com/trufflesuite/ganache-ui.git')
+        # node.changeWorkdir('/ganache-ui')
+        node.addBuildCommand('/usr/bin/npm install -g ganache-cli')
+        # node.changeWorkdir('/')
 
         # Change mode of gethBSC to executable
         node.addBuildCommand('chmod +x /usr/bin/geth')
@@ -727,7 +723,7 @@ class GanacheService(Service):
         self.__save_path = statePath
 
     def getName(self):
-        return 'GanacheService'
+        return 'Ganache'
 
     def getBootNodes(self) -> List[str]:
         """
@@ -741,7 +737,7 @@ class GanacheService(Service):
         self._log('configuring as{}/{} as an eth node...'.format(node.getAsn(), node.getName()))
 
         ifaces = node.getInterfaces()
-        assert len(ifaces) > 0, 'BSCService::_doConfigure(): node as{}/{} has not interfaces'.format()
+        assert len(ifaces) > 0, 'GanacheService::_doConfigure(): node as{}/{} has not interfaces'.format()
         addr = '{}:{}'.format(str(ifaces[0].getAddress()), server.getBootNodeHttpPort())
 
         if server.isBootNode():
@@ -751,7 +747,7 @@ class GanacheService(Service):
         if self.__save_state:
             node.addSharedFolder('/root/.ethereum', '{}/{}'.format(self.__save_path, server.getId()))
 
-    def _doInstall(self, node: Node, server: BSCServer):
+    def _doInstall(self, node: Node, server: GanacheServer):
         self._log('installing eth on as{}/{}...'.format(node.getAsn(), node.getName()))
 
         all_bootnodes = len(self.__boot_node_addresses) == 0
@@ -763,7 +759,7 @@ class GanacheService(Service):
 
     def _createServer(self) -> Server:
         self.__serial += 1
-        return BSCServer(self.__serial)
+        return GanacheServer(self.__serial)
 
     def print(self, indent: int) -> str:
         out = ' ' * indent
